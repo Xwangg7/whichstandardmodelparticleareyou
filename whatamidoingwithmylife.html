@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Which Standard Model Particle Are You?</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f2f0;
+            color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 20px;
+        }
+
+        .quiz {
+            width: min(760px, 100%);
+            background: #fff;
+            border: 1px solid #bdbdbd;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 28px 32px 24px;
+            background: #e8e8e6;
+            border-bottom: 1px solid #bdbdbd;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(22px, 4vw, 32px);
+            line-height: 1.2;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .progress {
+            height: 4px;
+            background: #e0e0de;
+            border-bottom: 1px solid #c8c8c8;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #555;
+            transition: width .25s ease;
+        }
+
+        .content {
+            padding: 42px 42px 35px;
+        }
+
+        .question-number {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: #777;
+            margin-bottom: 18px;
+        }
+
+        .question {
+            font-size: clamp(19px, 3vw, 25px);
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 30px;
+        }
+
+        .answers {
+            display: grid;
+            gap: 8px;
+        }
+
+        .answer {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #c7c7c7;
+            border-radius: 2px;
+            background: #fafafa;
+            color: #222;
+            text-align: left;
+            font: inherit;
+            font-size: 15px;
+            cursor: pointer;
+            transition:
+                background .1s ease,
+                border-color .1s ease;
+        }
+
+        .answer:hover {
+            background: #eeeeee;
+            border-color: #999;
+        }
+
+        .answer.selected {
+            background: #e2e2e2;
+            border-color: #555;
+        }
+
+        .answer-letter {
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #999;
+            border-radius: 2px;
+            margin-right: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            vertical-align: middle;
+            color: #555;
+        }
+
+        .answer.selected .answer-letter {
+            border-color: #555;
+            background: #fff;
+            color: #222;
+        }
+
+        .answer-text {
+            vertical-align: middle;
+        }
+
+        .footer {
+            padding: 0 42px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back {
+            border: none;
+            background: transparent;
+            color: #666;
+            font: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .back:hover {
+            color: #111;
+        }
+
+        .next {
+            border: 1px solid #555;
+            border-radius: 2px;
+            padding: 10px 18px;
+            background: #555;
+            color: #fff;
+            font: inherit;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .next:hover:not(:disabled) {
+            background: #333;
+        }
+
+        .next:disabled {
+            opacity: .3;
+            cursor: not-allowed;
+        }
+
+        /* RESULT */
+
+        .result {
+            display: none;
+            text-align: center;
+            padding: 55px 42px 60px;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .quiz.finished .question-screen {
+            display: none;
+        }
+
+        .result-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .particle-symbol {
+            width: 130px;
+            height: 130px;
+            margin: 30px auto;
+            border: 1px solid #888;
+            border-radius: 50%;
+            background: #f1f1ef;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .particle-symbol .symbol {
+            font-size: 44px;
+            font-weight: 400;
+        }
+
+        .particle-symbol .spin {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .result h2 {
+            font-size: 32px;
+            font-weight: 600;
+            margin: 10px 0 12px;
+        }
+
+        .result-description {
+            max-width: 500px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+            font-size: 15px;
+            color: #444;
+        }
+
+        .restart {
+            border: 1px solid #999;
+            border-radius: 2px;
+            padding: 10px 18px;
+            background: #f5f5f5;
+            color: #333;
+            font: inherit;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .restart:hover {
+            background: #e5e5e5;
+        }
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 20px 10px;
+            }
+
+            .header {
+                padding: 23px 20px 19px;
+            }
+
+            .content {
+                padding: 30px 20px 25px;
+            }
+
+            .footer {
+                padding: 0 20px 25px;
+            }
+
+            .result {
+                padding: 40px 20px 45px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="quiz" id="quiz">
+
+        <div class="header">
+            <h1>Which Standard Model Particle Are You?</h1>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="question-screen">
+
+            <div class="content">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question" id="question"></div>
+                <div class="answers" id="answers"></div>
+            </div>
+
+            <div class="footer">
+                <button class="back" id="backButton">← Back</button>
+                <button class="next" id="nextButton" disabled>Next →</button>
+            </div>
+
+        </div>
+
+        <div class="result" id="result">
+
+            <div class="result-label">The universe has decided</div>
+
+            <div class="particle-symbol">
+                <div class="symbol" id="resultSymbol"></div>
+                <div class="spin" id="resultType"></div>
+            </div>
+
+            <h2 id="resultName"></h2>
+
+            <div class="result-description" id="resultDescription"></div>
+
+            <button class="restart" id="restartButton">
+                Do this again for some reason
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        /* =========================================================
+           QUESTIONS
+           =========================================================
+        
+           Each question contains:
+           - question: the question text
+           - answers: four possible responses
+        
+           You can freely edit/add/remove questions here.
+        
+           IMPORTANT:
+           Keep exactly four answers per question if you want
+           the existing result algorithm to work unchanged.
+        ========================================================= */
+
+        const questions = [
+
+            {
+                question: "You find a note on your desk that says: “THE DUCK KNOWS.” What do you do?",
+                answers: [
+                    "Find the duck.",
+                    "Find whoever wrote the note.",
+                    "Cook the duck then eat it.",
+                    "Say nothing. The duck is probably watching."
+                ]
+            },
+
+            {
+                question: "You are given a button labelled “DO NOT PRESS.”",
+                answers: [
+                    "Press it.",
+                    "Inspect the button first, then press it.",
+                    "Ask someone else to press it, and press it yourself when they refuse.",
+                    "Eat the button."
+                ]
+            },
+
+            {
+                question: "A pigeon lands on your shoulder and whispers your full legal name.",
+                answers: [
+                    "“What do you want?”",
+                    "Immediately leave.",
+                    "Whisper its full legal name back.",
+                    "“You suck.”"
+                ]
+            },
+
+            {
+                question: "You are offered $10 million, but a goose follows you for the rest of your life.",
+                answers: [
+                    "Take the money. I can outsmart a goose.",
+                    "Absolutely not.",
+                    "Ask whether the goose is immortal.",
+                    "Take the money and eat the goose."
+                ]
+            },
+
+            {
+                question: "Your fridge starts speaking to you at 3:17 AM. It says, “We need to talk.”",
+                answers: [
+                    "“About what?”",
+                    "“I'm not dealing with this tonight.”",
+                    "Open the fridge.",
+                    "“I've been waiting for this.”"
+                ]
+            },
+
+            {
+                question: "A dog runs up to you and says, “It's happening again.”",
+                answers: [
+                    "“What is?”",
+                    "Follow the dog.",
+                    "Run.",
+                    "“Again?? What happened LAST time?”"
+                ]
+            },
+
+            {
+                question: "Your dog has drawn an electron-positron interaction on the floor.",
+                answers: [
+                    "Ask “do you know what the duck knows?”",
+                    "Take a photo.",
+                    "Give it your goose.",
+                    "Press the button."
+                ]
+            },
+
+            {
+                question: "The duck from earlier is sitting at your desk and explaining special relativity.",
+                answers: [
+                    "Ask it to do your homework.",
+                    "“Is that the duck or the goose?”",
+                    "Feed it a teaspoon of grapes.",
+                    "Buy its silence with some of your $10 million."
+                ]
+            },
+
+            {
+                question: "The button is missing. The goose is holding it.",
+                answers: [
+                    "Take it back.",
+                    "Ask the goose where it got it.",
+                    "Offer the goose $10 million.",
+                    "This explains nothing."
+                ]
+            },
+
+            {
+                question: "The pigeon sends you a photograph of you.",
+                answers: [
+                    "Ask when it was taken.",
+                    "Ask who took it.",
+                    "Whisper its full legal name back.",
+                    "Delete the pigeon."
+                ]
+            },
+
+            {
+                question: "The dog asks you what year it is.",
+                answers: [
+                    "Tell it.",
+                    "Ask why.",
+                    "Ask the duck.",
+                    "Run."
+                ]
+            },
+
+            {
+                question: "The fridge says the duck has made a mistake.",
+                answers: [
+                    "Ask what mistake.",
+                    "Ask the duck.",
+                    "Unplug the fridge.",
+                    "Press the button."
+                ]
+            },
+
+            {
+                question: "The duck writes an equation describing the end of the universe.",
+                answers: [
+                    "Ask for the working.",
+                    "Take a photo.",
+                    "Give it the goose.",
+                    "Pretend you didn't see it."
+                ]
+            },
+
+            {
+                question: "The sky disappears.",
+                answers: [
+                    "Look for the sky.",
+                    "Ask the dog.",
+                    "Ask the duck.",
+                    "Press the button."
+                ]
+            },
+
+            {
+                question: "The universe gives you one final message before it collapses. It says:",
+                answers: [
+                    "“You suck.”",
+                    "“We need to talk about the duck.”",
+                    "“Unfortunately, there has been an error.”",
+                    "“I am your fridge.”"
+                ]
+            }
+
+        ];
+
+
+        /* =========================================================
+           PARTICLES
+        ========================================================= */
+
+        const particles = [
+
+            {
+                name: "Up Quark",
+                symbol: "u",
+                type: "QUARK",
+                description: "Always high."
+            },
+
+            {
+                name: "Down Quark",
+                symbol: "d",
+                type: "QUARK",
+                description: "Get up already."
+            },
+
+            {
+                name: "Charm Quark",
+                symbol: "c",
+                type: "QUARK",
+                description: "Made from the ashes of disney princes."
+            },
+
+            {
+                name: "Strange Quark",
+                symbol: "s",
+                type: "QUARK",
+                description: "Just weird."
+            },
+
+            {
+                name: "Top Quark",
+                symbol: "t",
+                type: "QUARK",
+                description: "Massive ego."
+            },
+
+            {
+                name: "Bottom Quark",
+                symbol: "b",
+                type: "QUARK",
+                description: "At the bottom. Stay there."
+            },
+
+            {
+                name: "Electron",
+                symbol: "e⁻",
+                type: "LEPTON",
+                description: "Stop being so negative."
+            },
+
+            {
+                name: "Muon",
+                symbol: "μ⁻",
+                type: "LEPTON",
+                description: "stop μing you're not cool."
+            },
+
+            {
+                name: "Tau",
+                symbol: "τ⁻",
+                type: "LEPTON",
+                description: "Third wheel of the lepton family."
+            },
+
+            {
+                name: "Electron Neutrino",
+                symbol: "νₑ",
+                type: "LEPTON",
+                description: "Electron with a moustache."
+            },
+
+            {
+                name: "Muon Neutrino",
+                symbol: "νμ",
+                type: "LEPTON",
+                description: "Completely neutral. Coward."
+            },
+
+            {
+                name: "Tau Neutrino",
+                symbol: "ντ",
+                type: "LEPTON",
+                description: "Nobody knows who that is."
+            },
+
+            {
+                name: "Photon",
+                symbol: "γ",
+                type: "BOSON",
+                description: "No mass and still a burden."
+            },
+
+            {
+                name: "Gluon",
+                symbol: "g",
+                type: "BOSON",
+                description: "Holding everything together but nobody appreciates it."
+            },
+
+            {
+                name: "W Boson",
+                symbol: "W",
+                type: "BOSON",
+                description: "Making everything decay and acting surprised."
+            },
+
+            {
+                name: "Z Boson",
+                symbol: "Z",
+                type: "BOSON",
+                description: "The W's boring cousin."
+            },
+
+            {
+                name: "Higgs Boson",
+                symbol: "H",
+                type: "BOSON",
+                description: "You're not even in the syllabus."
+            }
+
+        ];
+
+        /* =========================================================
+           STATE
+        ========================================================= */
+
+        let currentQuestion = 0;
+        let selectedAnswers = new Array(questions.length).fill(null);
+
+
+        /* =========================================================
+           DOM
+        ========================================================= */
+
+        const questionNumber = document.getElementById("questionNumber");
+        const questionElement = document.getElementById("question");
+        const answersElement = document.getElementById("answers");
+        const nextButton = document.getElementById("nextButton");
+        const backButton = document.getElementById("backButton");
+        const progressBar = document.getElementById("progressBar");
+
+        const quiz = document.getElementById("quiz");
+        const result = document.getElementById("result");
+
+        const resultSymbol = document.getElementById("resultSymbol");
+        const resultType = document.getElementById("resultType");
+        const resultName = document.getElementById("resultName");
+        const resultDescription = document.getElementById("resultDescription");
+
+        const restartButton = document.getElementById("restartButton");
+
+
+        /* =========================================================
+           RENDER QUESTION
+        ========================================================= */
+
+        function renderQuestion() {
+
+            const q = questions[currentQuestion];
+
+            questionNumber.textContent =
+                `Question ${currentQuestion + 1} / ${questions.length}`;
+
+            questionElement.textContent = q.question;
+
+            answersElement.innerHTML = "";
+
+            q.answers.forEach((answer, index) => {
+
+                const button = document.createElement("button");
+                button.className = "answer";
+
+                if (selectedAnswers[currentQuestion] === index) {
+                    button.classList.add("selected");
+                }
+
+                button.innerHTML = `
+            <span class="answer-letter">
+                ${String.fromCharCode(65 + index)}
+            </span>
+            <span class="answer-text">${answer}</span>
+        `;
+
+                button.addEventListener("click", () => {
+                    selectAnswer(index);
+                });
+
+                answersElement.appendChild(button);
+            });
+
+            nextButton.disabled =
+                selectedAnswers[currentQuestion] === null;
+
+            nextButton.textContent =
+                currentQuestion === questions.length - 1
+                    ? "Reveal result"
+                    : "Next →";
+
+            backButton.style.visibility =
+                currentQuestion === 0 ? "hidden" : "visible";
+
+            progressBar.style.width =
+                `${((currentQuestion) / questions.length) * 100}%`;
+        }
+
+
+        /* =========================================================
+           SELECT ANSWER
+        ========================================================= */
+
+        function selectAnswer(index) {
+
+            selectedAnswers[currentQuestion] = index;
+
+            document.querySelectorAll(".answer").forEach((button, i) => {
+                button.classList.toggle("selected", i === index);
+            });
+
+            nextButton.disabled = false;
+        }
+
+
+        /* =========================================================
+           NEXT
+        ========================================================= */
+
+        nextButton.addEventListener("click", () => {
+
+            if (selectedAnswers[currentQuestion] === null) {
+                return;
+            }
+
+            if (currentQuestion < questions.length - 1) {
+
+                currentQuestion++;
+                renderQuestion();
+
+            } else {
+
+                showResult();
+
+            }
+
+        });
+
+
+        /* =========================================================
+           BACK
+        ========================================================= */
+
+        backButton.addEventListener("click", () => {
+
+            if (currentQuestion > 0) {
+
+                currentQuestion--;
+                renderQuestion();
+
+            }
+
+        });
+
+
+        /* =========================================================
+           DETERMINISTIC RESULT GENERATOR
+        =========================================================
+        
+           THIS IS THE FUN PART.
+        
+           The answer itself has NO semantic relationship with
+           the particle.
+        
+           Each answer is simply represented by:
+               0 = A
+               1 = B
+               2 = C
+               3 = D
+        
+           We then mix all 15 numbers into a deterministic hash.
+        
+           Same answers = same number = same particle.
+        
+           Different answers can produce a different particle.
+        
+        ========================================================= */
+
+        function calculateResult() {
+
+            let hash = 2166136261;
+
+            selectedAnswers.forEach((answer, questionIndex) => {
+
+                /*
+                    Add the question number so that:
+        
+                    A on Q1
+                    and
+                    A on Q2
+        
+                    do NOT behave identically.
+                */
+
+                hash ^= (answer + 1) * (questionIndex + 17);
+
+                hash = Math.imul(hash, 16777619);
+
+                /*
+                    More mixing so the result isn't simply based
+                    on the total number of A/B/C/D answers.
+                */
+
+                hash ^= hash >>> 13;
+                hash = Math.imul(hash, 1274126177);
+                hash ^= hash >>> 16;
+            });
+
+            /*
+                Convert the unsigned 32-bit hash into an index.
+            */
+
+            const unsignedHash = hash >>> 0;
+
+            return unsignedHash % particles.length;
+        }
+
+
+        /* =========================================================
+           SHOW RESULT
+        ========================================================= */
+
+        function showResult() {
+
+            const particleIndex = calculateResult();
+            const particle = particles[particleIndex];
+
+            resultSymbol.textContent = particle.symbol;
+            resultType.textContent = particle.type;
+            resultName.textContent = particle.name;
+            resultDescription.textContent = particle.description;
+
+            progressBar.style.width = "100%";
+
+            quiz.classList.add("finished");
+            result.classList.add("show");
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+
+        /* =========================================================
+           RESTART
+        ========================================================= */
+
+        restartButton.addEventListener("click", () => {
+
+            currentQuestion = 0;
+            selectedAnswers = new Array(questions.length).fill(null);
+
+            quiz.classList.remove("finished");
+            result.classList.remove("show");
+
+            renderQuestion();
+
+        });
+
+
+        /* =========================================================
+           START
+        ========================================================= */
+
+        renderQuestion();
+
+    </script>
+
+</body>
+
+</html>
